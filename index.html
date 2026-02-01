@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bir Kahve?</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #f3d5c0, #c79081);
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #ffffff, #f8f3f0);
+      padding: 32px 28px 44px;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      position: relative;
+      animation: float 4s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      font-size: 24px;
+      color: #5a3e36;
+    }
+
+    p {
+      margin-bottom: 28px;
+      font-size: 15px;
+      color: #7a5a50;
+    }
+
+    .buttons {
+      position: relative;
+      height: 180px;
+    }
+
+    button {
+      padding: 14px 28px;
+      font-size: 15px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    button:active { transform: scale(0.94); }
+
+    #yesBtn {
+      background: linear-gradient(135deg, #6b4f4f, #8b6b6b);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(107, 79, 79, 0.45);
+      position: relative;
+      z-index: 2;
+    }
+
+    #noBtn {
+      position: absolute;
+      background: #ededed;
+      color: #555;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+      right: 10px;
+      bottom: 10px;
+    }
+
+    .message {
+      margin-top: 24px;
+      font-size: 18px;
+      display: none;
+      animation: pop 0.4s ease;
+    }
+
+    .success { color: #4caf50; }
+    .warning { color: #e53935; }
+
+    @keyframes pop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .coffee {
+      font-size: 52px;
+      margin-bottom: 8px;
+      animation: steam 2s ease-in-out infinite;
+    }
+
+    @keyframes steam {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .confetti {
+      position: fixed;
+      top: -20px;
+      font-size: 26px;
+      animation: fall 3s linear forwards;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 22px; }
+      p { font-size: 14px; }
+      .buttons { height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="coffee">☕</div>
+    <h1>Benimle kahve içer misin?</h1>
+    <p>Söz, çok güzel bir kahve ve güzel bir sohbet olacak.</p>
+
+    <div class="buttons" id="buttons">
+      <button id="yesBtn">Evet</button>
+      <button id="noBtn">Hayır</button>
+    </div>
+
+    <div class="message success" id="successMsg">
+      Harika! Kahveler benden ☕🎉
+    </div>
+
+    <div class="message warning" id="warningMsg">
+      Bir kahveye hayır deme lütfen 😢☕
+    </div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const buttons = document.getElementById("buttons");
+    const successMsg = document.getElementById("successMsg");
+    const warningMsg = document.getElementById("warningMsg");
+
+    function overlapsYes(x, y) {
+      const yesRect = yesBtn.getBoundingClientRect();
+      const containerRect = buttons.getBoundingClientRect();
+
+      const noRect = {
+        left: containerRect.left + x,
+        top: containerRect.top + y,
+        right: containerRect.left + x + noBtn.offsetWidth,
+        bottom: containerRect.top + y + noBtn.offsetHeight
+      };
+
+      return !(noRect.right < yesRect.left ||
+               noRect.left > yesRect.right ||
+               noRect.bottom < yesRect.top ||
+               noRect.top > yesRect.bottom);
+    }
+
+    function moveNoButton() {
+      const maxX = buttons.clientWidth - noBtn.offsetWidth;
+      const maxY = buttons.clientHeight - noBtn.offsetHeight;
+      let x, y;
+
+      do {
+        x = Math.random() * maxX;
+        y = Math.random() * maxY;
+      } while (overlapsYes(x, y));
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
+      noBtn.style.right = "auto";
+      noBtn.style.bottom = "auto";
+
+      warningMsg.style.display = "block";
+      successMsg.style.display = "none";
+    }
+
+    noBtn.addEventListener("mouseenter", moveNoButton);
+    noBtn.addEventListener("touchstart", moveNoButton);
+
+    yesBtn.addEventListener("click", () => {
+      successMsg.style.display = "block";
+      warningMsg.style.display = "none";
+      launchConfetti();
+    });
+
+    function launchConfetti() {
+      const emojis = ["☕", "🤎", "✨", "🎉"];
+      for (let i = 0; i < 24; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.animationDuration = 2 + Math.random() * 2 + "s";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+      }
+    }
+  </script>
+</body>
+</html>
